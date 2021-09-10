@@ -1,4 +1,7 @@
 import math
+from re import X
+
+from matplotlib.pyplot import axes
 
 def getHarmonicFunction(a, maxN, phi, f):
     return lambda n, a = a, maxN = maxN, phi = phi, f = f: a * math.sin(2 * math.pi * f * n / maxN + phi)
@@ -26,3 +29,8 @@ def parseNatural(str):
     if (value < 1):
         raise ValueError
     return value
+
+def getSampledFunc(func, sampleStep):
+    def calculate(x):
+        return func(x - (x % sampleStep))
+    return lambda x: calculate(x)
