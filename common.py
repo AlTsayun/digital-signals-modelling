@@ -6,25 +6,25 @@ from matplotlib.pyplot import axes
 def getHarmonicFunc(a, maxN, phi, f):
     return lambda n: a * math.sin(2 * math.pi * f * n / maxN + phi)
 
-def getSawFunc(a, t, phi):
-    def calculate(x, a, t, phi):
+def getSawFunc(a, f, phi):
+    def calculate(x, a, f, phi):
         try:
-            t = float(t(x))
+            t = 1 / float(f(x))
             phi = float(phi(x))
             a = float(a(x))
-            param = x % t
-            if (param != t):
+            param = (x - phi) % t
+            if (param != 0):
                 return param / t * a
             else:
-                return (param  - t) / (t / 4) * a
+                return 0
         except:
             raise ValueError
-    return lambda x, a=a, t=t, phi=phi: calculate(x, a, t, phi)
+    return lambda x, a=a, f=f, phi=phi: calculate(x, a, f, phi)
 
-def getTriangleFunc(a, t, phi):
-    def calculate(x, a, t, phi):
+def getTriangleFunc(a, f, phi):
+    def calculate(x, a, f, phi):
         try:
-            t = float(t(x))
+            t = 1 / float(f(x))
             phi = float(phi(x))
             a = float(a(x))
             param = (x - phi) % t
@@ -36,19 +36,19 @@ def getTriangleFunc(a, t, phi):
                 return (param  - t) / (t / 4) * a
         except:
             raise ValueError
-    return lambda x, a=a, t=t, phi=phi: calculate(x, a, t, phi)
+    return lambda x, a=a, f=f, phi=phi: calculate(x, a, f, phi)
 
 def getSampledFunc(func, sampleStep):
     def calculate(x):
-        return func(x // sampleStep)
+        return func((x // sampleStep) * sampleStep)
     return lambda x: calculate(x)
 
 def sumFuncs(funcs):
     return lambda x: sum([func(x) for func in funcs])
 
-def getTaylorHarmonicFunc(a, maxN, phi, f, k):
+def getTaylorHarmonicFunc(a, f, phi, k):
     func = getTaylorSinFunc(k)
-    return lambda n: a(n) * func(2 * math.pi * f(n) * n / maxN + phi(n))
+    return lambda x: a(x) * func(2 * math.pi * f(x) * x + phi(x))
 
 def getTaylorSinFunc(k):
     return getTaylorFunc(lambda x, i: ((-1) ** (i % 2)) * math.pow(x, 2 * i + 1) / math.factorial(2 * i + 1), k)
@@ -72,7 +72,7 @@ def parseMathExpression(str):
     return lambda x, str=str: calculate(x, str)
         
 def parseArray(str):
-    return list(map(parseMathExpression, str.replace(" ", "").split(",")))
+    return list(map(parseMathExpression, str.strip().split(",")))
 
 def parseNatural(str):
     try:
